@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/lucas55i/apiTdd/issues"
   },
-  "homepage": "https://github.com/lucas55i/apiTdd#readme"
+  "homepage": "https://github.com/lucas55i/apiTdd#readme",
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
 }
