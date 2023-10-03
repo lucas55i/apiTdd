@@ -1,5 +1,6 @@
 const LoginRouter = require('./login-router')
 const MissingParamError = require('../helpers/missing-param-error')
+const UnathorizedError  = require('../helpers/unathorized-error')
 
 const makeSut = () => {
     // Mock para LogiRouter()
@@ -77,5 +78,7 @@ describe('Login Router', () => {
         }
         const httpResponse = sut.route(httpResquest)
         expect(httpResponse.statusCode).toBe(401)
+        expect(httpResponse.body).toEqual(new UnathorizedError())
+
     })
 })
