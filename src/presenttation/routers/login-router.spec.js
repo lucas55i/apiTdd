@@ -8,9 +8,11 @@ const makeSut = () => {
         auth(email, password) {
             this.email = email
             this.password = password
+            return this.accessToken // token
         }
     }
     const authUseCaseSpy = new AuthUseCaseSpy()
+    authUseCaseSpy.accessToken = 'valid_token'
     const sut = new LoginRouter(authUseCaseSpy)
     return {
         sut, authUseCaseSpy
@@ -42,6 +44,31 @@ describe('Login Router', () => {
         expect(httpResponse.body).toEqual(new MissingParamError('password'))
     })
 
+    test('Should return 401 when invalid credentials are provided', () => {
+        const { sut, authUseCaseSpy } = makeSut()
+        authUseCaseSpy.accessToken = null
+        const httpResquest = {
+            body: {
+                email: 'invalid_email@hotmail.com',
+                password: 'invalid_password'
+            }
+        }
+        const httpResponse = sut.route(httpResquest)
+        expect(httpResponse.statusCode).toBe(401)
+        expect(httpResponse.body).toEqual(new UnathorizedError())
+
+    })
+    test('Should return 200 when valid credentials are provided', () => {
+        const { sut, authUseCaseSpy } = makeSut()
+        const httpResquest = {
+            body: {
+                email: 'valid@hotmail.com',
+                password: 'validPassword'
+            }
+        }
+        const httpResponse = sut.route(httpResquest)
+        expect(httpResponse.statusCode).toBe(200)
+    })
 
     test('Should return 500 if no httpRequest is provided', () => {
         const { sut } = makeSut()
@@ -67,20 +94,6 @@ describe('Login Router', () => {
         expect(authUseCaseSpy.email).toBe(httpResquest.body.email)
         expect(authUseCaseSpy.password).toBe(httpResquest.body.password)
     })
-
-    test('Should return 401 when invalid credentials are provided', () => {
-        const { sut } = makeSut()
-        const httpResquest = {
-            body: {
-                email: 'invalid_email@hotmail.com',
-                password: 'invalid_password'
-            }
-        }
-        const httpResponse = sut.route(httpResquest)
-        expect(httpResponse.statusCode).toBe(401)
-        expect(httpResponse.body).toEqual(new UnathorizedError())
-
-    })
     // Testando injeção de dependencias, se caso a classe AuthCaseSpy, 
     // não for informada
     test('Should return 500 if no AuthUseCase is provided', () => {
@@ -94,8 +107,8 @@ describe('Login Router', () => {
         const httpResponse = sut.route(httpResquest)
         expect(httpResponse.statusCode).toBe(500)
     })
-        // Testando injeção de dependencias, se caso a classe AuthCaseSpy, 
-        // for informada, mas sem os metodos necessários.
+    // Testando injeção de dependencias, se caso a classe AuthCaseSpy, 
+    // for informada, mas sem os metodos necessários.
     test('Should return 500 if AuthUseCase has no auth method', () => {
         const sut = new LoginRouter({})
         const httpResquest = {
