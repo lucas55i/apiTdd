@@ -59,6 +59,18 @@ describe('Login Router', () => {
 
     })
     test('Should return 200 when valid credentials are provided', () => {
+        const { sut } = makeSut()
+        const httpResquest = {
+            body: {
+                email: 'valid@hotmail.com',
+                password: 'validPassword'
+            }
+        }
+        const httpResponse = sut.route(httpResquest)
+        expect(httpResponse.statusCode).toBe(200)
+    })
+
+    test('Should return 201 when valid credentials are provided', () => {
         const { sut, authUseCaseSpy } = makeSut()
         const httpResquest = {
             body: {
@@ -68,6 +80,7 @@ describe('Login Router', () => {
         }
         const httpResponse = sut.route(httpResquest)
         expect(httpResponse.statusCode).toBe(200)
+        expect(httpResponse.body.accessToken).toEqual(authUseCaseSpy.accessToken)
     })
 
     test('Should return 500 if no httpRequest is provided', () => {
