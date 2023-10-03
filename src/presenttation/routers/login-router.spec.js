@@ -1,11 +1,11 @@
 const LoginRouter = require('./login-router')
 const MissingParamError = require('../helpers/missing-param-error')
-const UnathorizedError  = require('../helpers/unathorized-error')
+const UnathorizedError = require('../helpers/unathorized-error')
 
 const makeSut = () => {
     // Mock para LogiRouter()
     class AuthUseCaseSpy {
-        auth(email, password) { 
+        auth(email, password) {
             this.email = email
             this.password = password
         }
@@ -80,5 +80,31 @@ describe('Login Router', () => {
         expect(httpResponse.statusCode).toBe(401)
         expect(httpResponse.body).toEqual(new UnathorizedError())
 
+    })
+    // Testando injeção de dependencias, se caso a classe AuthCaseSpy, 
+    // não for informada
+    test('Should return 500 if no AuthUseCase is provided', () => {
+        const sut = new LoginRouter()
+        const httpResquest = {
+            body: {
+                email: 'any_email@hotmail.com',
+                password: 'any_password'
+            }
+        }
+        const httpResponse = sut.route(httpResquest)
+        expect(httpResponse.statusCode).toBe(500)
+    })
+        // Testando injeção de dependencias, se caso a classe AuthCaseSpy, 
+        // for informada, mas sem os metodos necessários.
+    test('Should return 500 if AuthUseCase has no auth method', () => {
+        const sut = new LoginRouter({})
+        const httpResquest = {
+            body: {
+                email: 'any_email@hotmail.com',
+                password: 'any_password'
+            }
+        }
+        const httpResponse = sut.route(httpResquest)
+        expect(httpResponse.statusCode).toBe(500)
     })
 })
